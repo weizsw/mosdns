@@ -1,6 +1,8 @@
 log:
   level: info
-  file: "/tmp/mosdns.log"
+  file: "/var/log/mosdns.log"
+api:
+  http: "0.0.0.0:8338" # api 监听地址
 
 plugins:
   # 缓存插件
@@ -22,6 +24,7 @@ plugins:
         - "/etc/mosdns/rule/whitelist.txt"
         - "/var/mosdns/geosite_cn.txt"
         - "/var/mosdns/geosite_category-games@cn.txt"
+        - "/var/mosdns/geosite_apple-cn.txt"
 
   # 国内 IP
   - tag: geoip_cn
@@ -42,15 +45,53 @@ plugins:
   - tag: forward_local
     type: forward
     args:
+      concurrent: 10
       upstreams:
-        #- addr: "116.228.111.118"
-        #- addr: "180.168.255.18"
-        #- addr: "119.29.29.29"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200:baba::1"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.5.5.5"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200::1"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.6.6.6"
+
         - addr: "tls://dns.alidns.com"
+          dial_addr: "2400:3200:baba::1"
           enable_pipeline: true
-        - addr: "tls://1.12.12.12"
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "223.5.5.5"
           enable_pipeline: true
-        - addr: "tls://120.53.53.53"
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "2400:3200::1"
+          enable_pipeline: true
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "223.6.6.6"
+          enable_pipeline: true
+
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200:baba::1"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.5.5.5"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200::1"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.6.6.6"
+          enable_http3: true
+
+        - addr: "https://doh.pub/dns-query"
+          dial_addr: "1.12.12.12"
+        - addr: "https://doh.pub/dns-query"
+          dial_addr: "120.53.53.53"
+
+        - addr: "tls://dot.pub"
+          dial_addr: "1.12.12.12"
+          enable_pipeline: true
+        - addr: "tls://dot.pub"
+          dial_addr: "120.53.53.53"
           enable_pipeline: true
 
   # 国外 DNS
@@ -58,41 +99,100 @@ plugins:
   - tag: forward_remote
     type: forward
     args:
+      concurrent: 10
       upstreams:
-        # 101DNS
-        - addr: "tls://101.101.101.101"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::6464"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::0064"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8844"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8888"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.4.4"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.8.8"
+
+        - addr: "tls://dns.google"
+          dial_addr: "8.8.4.4"
+          enable_pipeline: true # TCP/DoT 启用 RFC 7766 新的 query pipelining 连接复用模式
+        - addr: "tls://dns.google"
+          dial_addr: "2001:4860:4860::8888"
           enable_pipeline: true
-        # NextDNS HK 节点
-        - addr: "https://45.11.104.186"
-          insecure_skip_verify: true
-        # OpenDNS SANDNOX
-        - addr: "tls://208.67.222.2"
+        - addr: "tls://dns.google"
+          dial_addr: "8.8.8.8"
           enable_pipeline: true
-        # OpenDNS
-        - addr: "tls://208.67.222.222"
+        # h3
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8844"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.4.4"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8888"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.8.8"
+          enable_http3: true
+
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1001"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1111"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "2606:4700:4700::1001"
+          enable_pipeline: true # TCP/DoT 启用 RFC 7766 新的 query pipelining 连接复用模式
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "1.0.0.1"
           enable_pipeline: true
-        #- addr: "https://1.1.1.1/dns-query"
-        #  insecure_skip_verify: true
-        #- addr: "tls://9.9.9.9:853"
-        #  enable_pipeline: true
-        - addr: "8.8.8.8"
-        #- addr: "tls://94.140.14.140"
-        #  enable_pipeline: true
-        #- addr: "tls://dns.quad9.net"
-        #  enable_pipeline: true
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "2606:4700:4700::1111"
+          enable_pipeline: true
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "1.0.0.1"
+          enable_pipeline: true
+
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1001"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1111"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.1.1.1"
+          enable_http3: true
 
   # 私人分流 dns
   - tag: forward_private
     type: forward
     args:
+      concurrent: 3
       upstreams:
-        - addr: "https://doh.apad.pro/dns-query"
-          bootstrap: "223.5.5.5"
+        - addr: "https://dns.nextdns.io"
+          bootstrap: "45.90.28.186"
+        - addr: "https://dns.nextdns.io"
+          dial_addr: "2a07:a8c0::ae:d5cb"
+          enable_http3: true
+
+        - addr: "tls://dns.nextdns.io"
+          enable_pipeline: true
+          dial_addr: "45.90.28.186"
 
   # 国内解析
   - tag: local_sequence
     type: sequence
     args:
+      - exec: query_summary forward_local
       - exec: $forward_local
 
   # 国外解析
@@ -100,18 +200,21 @@ plugins:
     type: sequence
     args:
       - exec: prefer_ipv4
+      - exec: query_summary forward_remote
       - exec: $forward_remote
 
   # 分流解析
   - tag: private_sequence
     type: sequence
     args:
+      - exec: query_summary forward_private
       - exec: $forward_private
 
   # clash 解析
   - tag: clash_sequence
     type: sequence
     args:
+      - exec: query_summary clash_sequence
       - exec: forward 127.0.0.1:7874
       - exec: ttl 0
 
@@ -128,6 +231,7 @@ plugins:
     type: sequence
     args:
       - exec: $private_sequence
+      - exec: query_summary fallback_sequence
       - matches: "!resp_ip $geoip_cn"
         exec: goto clash_sequence
       - exec: accept
@@ -137,6 +241,7 @@ plugins:
     type: sequence
     args:
       - exec: $remote_sequence
+      - exec: query_summary fallback2_sequence
       - matches: "resp_ip $geoip_cn"
         exec: goto local_sequence
       - exec: goto clash_sequence
@@ -156,6 +261,7 @@ plugins:
   - tag: main_sequence
     type: sequence
     args:
+      - exec: metrics_collector metrics
       # drop https query type
       - matches:
           - qtype 65

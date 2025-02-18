@@ -2,6 +2,9 @@ log:
   level: debug
   file: "/tmp/mosdns.log"
 
+api:
+  http: "0.0.0.0:8338" # api 监听地址
+
 include:
   - "/etc/mosdns/dat_exec.yaml"
   - "/etc/mosdns/dns.yaml"
@@ -46,13 +49,13 @@ plugins:
   - tag: dns_nocn_seq
     type: sequence
     args:
-      - exec: query_summary forward_remote
+      - exec: query_summary dns_nocn
       - exec: $dns_nocn
 
   - tag: dns_cn_seq
     type: sequence
     args:
-      - exec: query_summary forward_local
+      - exec: query_summary dns_cn
       - exec: $dns_cn
 
   - tag: local_seq
@@ -86,11 +89,16 @@ plugins:
   - tag: query_nocn
     type: sequence
     args:
-      # - exec: $ecs-cn
+      - exec: $no_ecs
       - exec: prefer_ipv4
       - exec: $dns_nocn_seq
       - matches: "resp_ip $geoip_cn" # 响应为 cn ip
         exec: drop_resp # 丢弃
+
+  - tag: query_gfw
+    type: sequence
+    args:
+      - exec: $forward_remote
 
   # query fallback
   - tag: query_fallback
@@ -169,6 +177,9 @@ plugins:
       - exec: jump has_resp_main
       - matches: qname $geosite_cn # cn 域名
         exec: $query_cn
+      - exec: jump has_resp_main
+      - matches: qname $geosite_gfw
+        exec: $query_gfw
       - exec: jump has_resp_main
       - matches: qname $geosite_location-!cn # 非 cn 域名
         exec: $query_nocn

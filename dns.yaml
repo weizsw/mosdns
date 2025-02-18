@@ -88,34 +88,7 @@ plugins:
     args:
       concurrent: 1
       upstreams:
-        - addr: tls://8.8.8.8
-          bootstrap: 119.29.29.29
-          enable_pipeline: false
-          max_conns: 2
-          insecure_skip_verify: false
-          idle_timeout: 30
-          enable_http3: false
-        - addr: tls://8.8.4.4
-          bootstrap: 119.29.29.29
-          enable_pipeline: false
-          max_conns: 2
-          insecure_skip_verify: false
-          idle_timeout: 30
-          enable_http3: false
-        - addr: tls://1.1.1.1
-          bootstrap: 119.29.29.29
-          enable_pipeline: false
-          max_conns: 2
-          insecure_skip_verify: false
-          idle_timeout: 30
-          enable_http3: false
-        - addr: tls://208.67.222.222
-          bootstrap: 119.29.29.29
-          enable_pipeline: false
-          max_conns: 2
-          insecure_skip_verify: false
-          idle_timeout: 30
-          enable_http3: false
+        - addr: 127.0.0.1:7874
 
   # ali doh dot h3
   - tag: ali
@@ -182,7 +155,7 @@ plugins:
     args:
       concurrent: 1
       upstreams:
-        - addr: "udp://192.168.50.1:53"
+        - addr: "udp://127.0.0.1:53"
 
   # server 失败
   - tag: reject_2

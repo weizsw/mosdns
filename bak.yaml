@@ -204,6 +204,17 @@ plugins:
       threshold: 2000
       always_standby: true
 
+  - tag: reject_qtype65
+    type: sequence
+    args:
+      - exec: query_summary reject_qtype65
+      - exec: reject 3
+
+  - tag: reject_null_domain
+    type: sequence
+    args:
+      - exec: query_summary reject_null_domain
+      - exec: reject 3
   # 主要的运行逻辑插件
   # sequence 插件中调用的插件 tag 必须在 sequence 前定义，
   # 否则 sequence 找不到对应插件。
@@ -214,8 +225,9 @@ plugins:
       # drop https query type
       - matches:
           - qtype 65
-        exec: reject 3
-
+        exec: $reject_qtype65
+      - matches: "qname keyword::" # 无效域名
+        exec: $reject_null_domain
       # handle local ptr
       - matches:
           - qtype 12
@@ -237,7 +249,7 @@ plugins:
         exec: $local_sequence
       - exec: jump has_resp_sequence
 
-      - exec: $fallback
+      - exec: $clash_sequence
 
   - tag: udp_server
     type: udp_server

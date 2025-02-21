@@ -1,6 +1,6 @@
 log:
-  level: debug
-  file: "/tmp/mosdns.log"
+  level: info
+  file: "/var/log/mosdns.log"
 
 api:
   http: "0.0.0.0:8338" # api 监听地址
@@ -49,13 +49,13 @@ plugins:
   - tag: dns_nocn_seq
     type: sequence
     args:
-      - exec: query_summary dns_nocn
+      - exec: query_summary forward_remote
       - exec: $dns_nocn
 
   - tag: dns_cn_seq
     type: sequence
     args:
-      - exec: query_summary dns_cn
+      - exec: query_summary forward_local
       - exec: $dns_cn
 
   - tag: local_seq
@@ -98,6 +98,7 @@ plugins:
   - tag: query_gfw
     type: sequence
     args:
+      - exec: query_summary forward_gfw
       - exec: $forward_remote
 
   # query fallback

@@ -77,9 +77,9 @@ plugins:
   - tag: ecs_cn
     type: "ecs_handler"
     args:
-      forward: false # 是否转发来自下游的 ecs
+      forward: true # 是否转发来自下游的 ecs
       preset: 116.228.111.118 # 发送预设 ecs
-      send: false # 是否发送 ecs
+      send: true # 是否发送 ecs
       mask4: 24 # ipv4 掩码。默认 24
       mask6: 48 # ipv6 掩码。默认 48
 
